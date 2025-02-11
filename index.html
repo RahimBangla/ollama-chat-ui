@@ -83,6 +83,22 @@
          border-radius: 5px;
          margin: 10px 0;
       }
+
+      .status-indicator {
+         display: inline-block;
+         width: 10px;
+         height: 10px;
+         border-radius: 50%;
+         margin-left: 10px;
+      }
+
+      .status-online {
+         background-color: #28a745;
+      }
+
+      .status-offline {
+         background-color: #dc3545;
+      }
    </style>
 </head>
 
@@ -107,7 +123,10 @@
 
                <div class="mb-3">
                   <label for="apiEndpoint" class="form-label">Ollama API Endpoint:</label>
-                  <input type="text" id="apiEndpoint" class="form-control" placeholder="Enter Ollama API endpoint...">
+                  <div class="d-flex align-items-center">
+                     <input type="text" id="apiEndpoint" class="form-control" placeholder="Enter Ollama API endpoint...">
+                     <div id="statusIndicator" class="status-indicator status-offline" title="Ollama Status"></div>
+                  </div>
                </div>
 
                <div class="mb-3">
@@ -299,6 +318,28 @@
    <script>
       const DEFAULT_ENDPOINT = "https://ai.yfbd.org" || "http://localhost:11434";
 
+      async function checkOllamaStatus() {
+         const apiEndpoint = document.getElementById('apiEndpoint').value;
+         const statusIndicator = document.getElementById('statusIndicator');
+         
+         try {
+            const response = await fetch(`${apiEndpoint}/api/tags`);
+            if (response.ok) {
+               statusIndicator.classList.remove('status-offline');
+               statusIndicator.classList.add('status-online');
+               statusIndicator.title = 'Ollama Online';
+            } else {
+               statusIndicator.classList.remove('status-online');
+               statusIndicator.classList.add('status-offline');
+               statusIndicator.title = 'Ollama Offline';
+            }
+         } catch (error) {
+            statusIndicator.classList.remove('status-online');
+            statusIndicator.classList.add('status-offline');
+            statusIndicator.title = 'Ollama Offline';
+         }
+      }
+
       async function fetchModels() {
          try {
             const apiEndpoint = document.getElementById('apiEndpoint').value;
@@ -404,17 +445,21 @@
          const savedEndpoint = localStorage.getItem('ollamaEndpoint');
          const apiEndpointInput = document.getElementById('apiEndpoint');
          apiEndpointInput.value = savedEndpoint || DEFAULT_ENDPOINT;
+         checkOllamaStatus();
       }
 
       // Save endpoint to localStorage when changed
       document.getElementById('apiEndpoint').addEventListener('change', (e) => {
          localStorage.setItem('ollamaEndpoint', e.target.value);
+         checkOllamaStatus();
          fetchModels();
       });
 
       window.onload = () => {
          loadEndpoint();
          fetchModels();
+         // Check status periodically
+         setInterval(checkOllamaStatus, 30000); // Check every 30 seconds
       };
    </script>
 
