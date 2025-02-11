@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Ollama AI Chat with Image Upload</title>
+   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   <style>
+      body {
+         background-color: #f8f9fa;
+      }
+
+      .chat-container {
+         max-width: 650px;
+         margin: auto;
+         background: white;
+         padding: 20px;
+         border-radius: 10px;
+         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      #response {
+         border: 1px solid #ddd;
+         padding: 15px;
+         min-height: 80px;
+         background: #f1f3f5;
+         border-radius: 8px;
+         overflow-x: auto;
+      }
+
+      #response pre {
+         background: #eef;
+         padding: 10px;
+         border-radius: 5px;
+      }
+
+      #uploadedImage {
+         max-width: 100%;
+         border-radius: 8px;
+         margin-top: 10px;
+         display: none;
+      }
+
+      footer {
+         text-align: center;
+         padding: 20px;
+         margin-top: 30px;
+         background-color: #f8f9fa;
+         border-top: 1px solid #ddd;
+      }
+
+      footer a {
+         color: #0d6efd;
+         text-decoration: none;
+      }
+
+      footer a:hover {
+         text-decoration: underline;
+      }
+   </style>
+</head>
+
+<body>
+
+   <div class="container mt-5">
+      <div class="chat-container p-4">
+         <h2 class="text-center mb-4">🧠 Ollama AI Chat</h2>
+
+         <div class="mb-3">
+            <label for="apiEndpoint" class="form-label">Ollama API Endpoint:</label>
+            <input type="text" id="apiEndpoint" class="form-control" placeholder="Enter Ollama API endpoint...">
+         </div>
+
+         <div class="mb-3">
+            <label for="model" class="form-label">Select Model:</label>
+            <select id="model" class="form-select"></select>
+         </div>
+
+         <div class="mb-3">
+            <label for="prompt" class="form-label">Your Question:</label>
+            <textarea id="prompt" class="form-control" rows="4" placeholder="Enter your prompt..."></textarea>
+         </div>
+
+         <div class="mb-3">
+            <label for="image" class="form-label">Upload Image (Optional):</label>
+            <input type="file" id="image" class="form-control" accept="image/*">
+            <img id="uploadedImage" class="img-fluid mt-2" alt="Uploaded Image Preview">
+         </div>
+
+         <button class="btn btn-primary w-100" onclick="askOllama()">🚀 Ask AI</button>
+
+         <h5 class="mt-4">Response:</h5>
+         <div id="response">Waiting for input...</div>
+      </div>
+
+   </div>
+
+   <footer style="position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; padding: 10px;">
+      <p>
+         Developed by
+         <a href="https://github.com/rahimbangla" target="_blank">Abdur Rahim</a>
+         and
+         <a href="https://github.com/RahimBangla/ollama-chat-ui" target="_blank">
+            <svg height="16" width="16" viewBox="0 0 16 16" style="vertical-align: text-bottom; fill: currentColor;">
+               <path
+                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+               </path>
+            </svg>
+            ollama-chat-ui
+         </a>
+      </p>
+   </footer>
+
+   <script>
+      const DEFAULT_ENDPOINT = "http://localhost:11434";
+
+      async function fetchModels() {
+         try {
+            const apiEndpoint = document.getElementById('apiEndpoint').value;
+            const res = await fetch(`${apiEndpoint}/api/tags`);
+            const data = await res.json();
+
+            const modelSelect = document.getElementById('model');
+            modelSelect.innerHTML = "";
+
+            data.models.forEach(model => {
+               let option = document.createElement("option");
+               option.value = model.name;
+               option.textContent = model.name;
+               modelSelect.appendChild(option);
+            });
+
+            if (data.models.length === 0) {
+               modelSelect.innerHTML = "<option>No models found</option>";
+            }
+         } catch (error) {
+            console.error("Error fetching models:", error);
+            document.getElementById("model").innerHTML = "<option>Error loading models</option>";
+         }
+      }
+
+      async function askOllama() {
+         const prompt = document.getElementById('prompt').value;
+         const model = document.getElementById('model').value;
+         const responseDiv = document.getElementById('response');
+         const imageInput = document.getElementById('image').files[0];
+         const imagePreview = document.getElementById('uploadedImage');
+         const apiEndpoint = document.getElementById('apiEndpoint').value;
+
+         if (!model) {
+            responseDiv.innerHTML = "❌ No model selected.";
+            return;
+         }
+
+         responseDiv.innerHTML = "<div class='text-center text-primary'>🔄 Generating response...</div>";
+         let base64Image = null;
+
+         if (imageInput) {
+            base64Image = await convertToBase64(imageInput);
+            imagePreview.src = URL.createObjectURL(imageInput);
+            imagePreview.style.display = "block";
+         } else {
+            imagePreview.style.display = "none";
+         }
+
+         const requestData = {
+            model: model,
+            prompt: prompt,
+            stream: true
+         };
+
+         if (base64Image) {
+            requestData.images = [base64Image];
+         }
+
+         try {
+            const response = await fetch(`${apiEndpoint}/api/generate`, {
+               method: "POST",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify(requestData)
+            });
+
+            const reader = response.body.getReader();
+            let accumulatedResponse = '';
+
+            while (true) {
+               const { done, value } = await reader.read();
+               if (done) break;
+
+               // Convert the chunk to text
+               const chunk = new TextDecoder().decode(value);
+               const lines = chunk.split('\n').filter(line => line.trim());
+
+               for (const line of lines) {
+                  const json = JSON.parse(line);
+                  if (json.response) {
+                     accumulatedResponse += json.response;
+                     responseDiv.innerHTML = marked.parse(accumulatedResponse);
+                  }
+               }
+            }
+         } catch (error) {
+            responseDiv.innerHTML = "❌ Error connecting to Ollama. Make sure it's running.";
+            console.error("API Error:", error);
+         }
+      }
+
+      async function convertToBase64(file) {
+         return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = error => reject(error);
+         });
+      }
+
+      // Load endpoint from localStorage or set default
+      function loadEndpoint() {
+         const savedEndpoint = localStorage.getItem('ollamaEndpoint');
+         const apiEndpointInput = document.getElementById('apiEndpoint');
+         apiEndpointInput.value = savedEndpoint || DEFAULT_ENDPOINT;
+      }
+
+      // Save endpoint to localStorage when changed
+      document.getElementById('apiEndpoint').addEventListener('change', (e) => {
+         localStorage.setItem('ollamaEndpoint', e.target.value);
+         fetchModels();
+      });
+
+      window.onload = () => {
+         loadEndpoint();
+         fetchModels();
+      };
+   </script>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
