@@ -59,42 +59,223 @@
       footer a:hover {
          text-decoration: underline;
       }
+
+      .nav-tabs {
+         margin-bottom: 20px;
+      }
+
+      .api-docs {
+         display: none;
+         padding: 20px;
+      }
+
+      .api-docs.active {
+         display: block;
+      }
+
+      .endpoint-details {
+         margin-bottom: 30px;
+      }
+
+      .code-block {
+         background: #f8f9fa;
+         padding: 15px;
+         border-radius: 5px;
+         margin: 10px 0;
+      }
    </style>
 </head>
 
 <body>
 
    <div class="container mt-5">
-      <div class="chat-container p-4">
-         <h2 class="text-center mb-4">🧠 Ollama AI Chat</h2>
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+         <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat" type="button" role="tab">Chat Interface</button>
+         </li>
+         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="docs-tab" data-bs-toggle="tab" data-bs-target="#docs" type="button" role="tab">API Documentation</button>
+         </li>
+      </ul>
 
-         <div class="mb-3">
-            <label for="apiEndpoint" class="form-label">Ollama API Endpoint:</label>
-            <input type="text" id="apiEndpoint" class="form-control" placeholder="Enter Ollama API endpoint...">
+      <div class="tab-content" id="myTabContent">
+         <div class="tab-pane fade show active" id="chat" role="tabpanel">
+            <div class="chat-container p-4">
+               <h2 class="text-center mb-4">🧠 Ollama AI Chat</h2>
+
+               <div class="mb-3">
+                  <label for="apiEndpoint" class="form-label">Ollama API Endpoint:</label>
+                  <input type="text" id="apiEndpoint" class="form-control" placeholder="Enter Ollama API endpoint...">
+               </div>
+
+               <div class="mb-3">
+                  <label for="model" class="form-label">Select Model:</label>
+                  <select id="model" class="form-select"></select>
+               </div>
+
+               <div class="mb-3">
+                  <label for="prompt" class="form-label">Your Question:</label>
+                  <textarea id="prompt" class="form-control" rows="4" placeholder="Enter your prompt..."></textarea>
+               </div>
+
+               <div class="mb-3">
+                  <label for="image" class="form-label">Upload Image (Optional):</label>
+                  <input type="file" id="image" class="form-control" accept="image/*">
+                  <img id="uploadedImage" class="img-fluid mt-2" alt="Uploaded Image Preview">
+               </div>
+
+               <button class="btn btn-primary w-100" onclick="askOllama()">🚀 Ask AI</button>
+
+               <h5 class="mt-4">Response:</h5>
+               <div id="response">Waiting for input...</div>
+            </div>
          </div>
 
-         <div class="mb-3">
-            <label for="model" class="form-label">Select Model:</label>
-            <select id="model" class="form-select"></select>
+         <div class="tab-pane fade" id="docs" role="tabpanel">
+            <div class="chat-container">
+               <h2 class="text-center mb-4">📚 Ollama API Documentation</h2>
+
+               <div class="endpoint-details">
+                  <h4>1. List Models</h4>
+                  <p><strong>Endpoint:</strong> GET /api/tags</p>
+                  <p><strong>Description:</strong> Returns a list of available models</p>
+                  <div class="code-block">
+                     <strong>Response:</strong>
+                     <pre>{
+  "models": [
+    {
+      "name": "llama2",
+      "modified_at": "2024-01-01T12:00:00Z",
+      "size": 4563416
+    }
+  ]
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>2. Generate Response</h4>
+                  <p><strong>Endpoint:</strong> POST /api/generate</p>
+                  <p><strong>Description:</strong> Generate a response from the model</p>
+                  <div class="code-block">
+                     <strong>Request:</strong>
+                     <pre>{
+  "model": "llama2",
+  "prompt": "What is artificial intelligence?",
+  "stream": true,
+  "images": ["base64_encoded_image"] // Optional
+}</pre>
+                     <strong>Response (Stream):</strong>
+                     <pre>{
+  "model": "llama2",
+  "created_at": "2024-01-01T12:00:00Z",
+  "response": "Artificial intelligence...",
+  "done": false
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>3. Model Information</h4>
+                  <p><strong>Endpoint:</strong> GET /api/show</p>
+                  <p><strong>Description:</strong> Get details about a specific model</p>
+                  <div class="code-block">
+                     <strong>Response:</strong>
+                     <pre>{
+  "license": "MIT",
+  "modelfile": "FROM llama2\nPARAMETER temp 0.7",
+  "parameters": "temp 0.7",
+  "template": "{{ .Prompt }}",
+  "system": "You are a helpful AI assistant."
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>4. Create Model</h4>
+                  <p><strong>Endpoint:</strong> POST /api/create</p>
+                  <p><strong>Description:</strong> Create a new model from a Modelfile</p>
+                  <div class="code-block">
+                     <strong>Request:</strong>
+                     <pre>{
+  "name": "custom_model",
+  "modelfile": "FROM llama2\nSYSTEM You are a helpful assistant",
+  "stream": true
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>5. Copy Model</h4>
+                  <p><strong>Endpoint:</strong> POST /api/copy</p>
+                  <p><strong>Description:</strong> Create a copy of a model</p>
+                  <div class="code-block">
+                     <strong>Request:</strong>
+                     <pre>{
+  "source": "llama2",
+  "destination": "llama2-copy"
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>6. Delete Model</h4>
+                  <p><strong>Endpoint:</strong> DELETE /api/delete</p>
+                  <p><strong>Description:</strong> Delete a model</p>
+                  <div class="code-block">
+                     <strong>Request:</strong>
+                     <pre>{
+  "name": "model_name"
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>7. Pull Model</h4>
+                  <p><strong>Endpoint:</strong> POST /api/pull</p>
+                  <p><strong>Description:</strong> Download a model from a registry</p>
+                  <div class="code-block">
+                     <strong>Request:</strong>
+                     <pre>{
+  "name": "llama2",
+  "stream": true
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>8. Push Model</h4>
+                  <p><strong>Endpoint:</strong> POST /api/push</p>
+                  <p><strong>Description:</strong> Upload a model to a registry</p>
+                  <div class="code-block">
+                     <strong>Request:</strong>
+                     <pre>{
+  "name": "username/model:latest",
+  "stream": true
+}</pre>
+                  </div>
+               </div>
+
+               <div class="endpoint-details">
+                  <h4>9. Embeddings</h4>
+                  <p><strong>Endpoint:</strong> POST /api/embeddings</p>
+                  <p><strong>Description:</strong> Generate embeddings from a model</p>
+                  <div class="code-block">
+                     <strong>Request:</strong>
+                     <pre>{
+  "model": "llama2",
+  "prompt": "Here is some text to generate embeddings for"
+}</pre>
+                     <strong>Response:</strong>
+                     <pre>{
+  "embeddings": [0.1, 0.2, 0.3, ...],
+}</pre>
+                  </div>
+               </div>
+
+            </div>
          </div>
-
-         <div class="mb-3">
-            <label for="prompt" class="form-label">Your Question:</label>
-            <textarea id="prompt" class="form-control" rows="4" placeholder="Enter your prompt..."></textarea>
-         </div>
-
-         <div class="mb-3">
-            <label for="image" class="form-label">Upload Image (Optional):</label>
-            <input type="file" id="image" class="form-control" accept="image/*">
-            <img id="uploadedImage" class="img-fluid mt-2" alt="Uploaded Image Preview">
-         </div>
-
-         <button class="btn btn-primary w-100" onclick="askOllama()">🚀 Ask AI</button>
-
-         <h5 class="mt-4">Response:</h5>
-         <div id="response">Waiting for input...</div>
       </div>
-
    </div>
 
    <footer style="position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; padding: 10px;">
