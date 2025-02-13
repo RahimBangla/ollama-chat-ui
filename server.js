@@ -4,7 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3100;
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
 
 // Enable CORS for all origins and methods
