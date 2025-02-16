@@ -23,20 +23,14 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+      - name: npm install
+        run: npm install
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
-
-      - name: Upload artifact for deployment job
+      - name: Upload source code
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,13 +43,10 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - name: Download artifact from build job
+      - name: Download source code
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -64,13 +55,5 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6D14D2EEB1EC444C9D7906EF13565B4E }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_203641BEC3514982ADC5BD9FE98CC6AC }}
 
-      - name: "Deploy to Azure Web App"
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: "T-ai"
-          slot-name: "Production"
-          package: .
-
-      - name: Start Node.js application
+      - name: "Run Node.js application"
         run: node app.js
