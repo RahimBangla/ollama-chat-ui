@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = process.env.PORT || 3100;
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
+const OLLAMA_URL = process.env.OLLAMA_URL || "http://192.168.80.200:3100";
 
 // Enable CORS for all origins and methods
 app.use(cors({
@@ -21,7 +21,7 @@ app.use(cors({
 // Handle preflight requests for all routes
 app.options('*', cors());
 
-// Trust proxy settings
+// Trust proxy settings for Azure App Service
 app.set('trust proxy', true);
 app.enable('trust proxy');
 
@@ -40,7 +40,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Health check endpoint
+// Health check endpoint - important for Azure App Service health monitoring
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK' });
 });
