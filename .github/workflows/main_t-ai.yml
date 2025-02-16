@@ -57,6 +57,9 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
       
+      - name: Install PM2 globally
+        run: npm install -g pm2
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -71,4 +74,4 @@ jobs:
           app-name: 'T-ai'
           slot-name: 'Production'
           package: .
-          
+          startup-file: "pm2 start app.js --no-daemon"  # Run app using PM2 in non-daemon mode
