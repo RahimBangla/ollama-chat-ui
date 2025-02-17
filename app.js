@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = process.env.PORT || 3100;
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://192.168.80.200:3100";
+const OLLAMA_URL = "http://192.168.80.200:3100";
 
 // Enable CORS for all origins and methods
 app.use(cors({
@@ -156,6 +156,7 @@ app.use("*", async (req, res) => {
         res.status(statusCode).json({
             error: "Failed to fetch from Ollama API",
             details: errorMessage,
+            baseUrl: OLLAMA_URL,
             path: req.originalUrl
         });
     }
