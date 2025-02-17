@@ -5,6 +5,7 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Ollama AI Chat with Image Upload</title>
+   <link rel="icon" href="chat-bot.gif" type="image/gif">
    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
    <style>
@@ -149,7 +150,7 @@
       <div class="tab-content" id="myTabContent">
          <div class="tab-pane fade show active" id="chat" role="tabpanel">
             <div class="chat-container p-4">
-               <h2 class="text-center mb-4">🧠 Ollama AI Chat</h2>
+               <h2 class="text-center mb-4"><img src="chat-bot.gif" alt="chat-bot" height="70px"> Ollama AI Chat</h2>
 
                <div class="mb-3">
                   <label for="apiEndpoint" class="form-label">Ollama API Endpoint:</label>
@@ -190,7 +191,7 @@
 
          <div class="tab-pane fade" id="docs" role="tabpanel">
             <div class="chat-container">
-               <h2 class="text-center mb-4">📚 Ollama API Documentation</h2>
+               <h2 class="text-center mb-4"><img src="ai.gif" alt="ai" height="50px"> Ollama API Documentation</h2>
 
                <div class="endpoint-details">
                   <h4>1. List Models</h4>
@@ -358,7 +359,7 @@
          const html = document.documentElement;
          const currentTheme = html.getAttribute('data-bs-theme');
          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-         
+
          html.setAttribute('data-bs-theme', newTheme);
          localStorage.setItem('theme', newTheme);
 
@@ -373,7 +374,7 @@
       function loadTheme() {
          const savedTheme = localStorage.getItem('theme') || 'light';
          document.documentElement.setAttribute('data-bs-theme', savedTheme);
-         
+
          const lightIcon = document.querySelector('.light-mode-icon');
          const darkIcon = document.querySelector('.dark-mode-icon');
          lightIcon.style.display = savedTheme === 'dark' ? 'none' : 'inline';
@@ -440,7 +441,7 @@
             return;
          }
 
-         responseDiv.innerHTML = "<div class='text-center text-primary'>🔄 Generating response...</div>";
+         responseDiv.innerHTML = "<div class='text-center text-primary'><img src='chat.gif' alt='ai' height='30px'>  Generating response...</div>";
          let base64Image = null;
 
          if (imageInput) {
