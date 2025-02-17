@@ -441,6 +441,7 @@
             return;
          }
 
+         let previousResponse = responseDiv.innerHTML;
          responseDiv.innerHTML = "<div class='text-center text-primary'><img src='chat.gif' alt='ai' height='30px'>  Generating response...</div>";
          let base64Image = null;
 
@@ -489,7 +490,7 @@
                }
             }
          } catch (error) {
-            responseDiv.innerHTML = "❌ Error connecting to Ollama. Make sure it's running.";
+            responseDiv.innerHTML = previousResponse + "<br><br>❌ Error connecting to Ollama. Make sure it's running.";
             console.error("API Error:", error);
          }
       }
