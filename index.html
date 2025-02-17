@@ -28,12 +28,29 @@
          background: #f1f3f5;
          border-radius: 8px;
          overflow-x: auto;
+         position: relative;
       }
 
       #response pre {
          background: #eef;
          padding: 10px;
          border-radius: 5px;
+      }
+
+      .copy-btn {
+         position: absolute;
+         top: 10px;
+         right: 10px;
+         padding: 5px 10px;
+         background: #fff;
+         border: 1px solid #ddd;
+         border-radius: 4px;
+         cursor: pointer;
+         opacity: 0.8;
+      }
+
+      .copy-btn:hover {
+         opacity: 1;
       }
 
       #uploadedImage {
@@ -124,7 +141,8 @@
                <div class="mb-3">
                   <label for="apiEndpoint" class="form-label">Ollama API Endpoint:</label>
                   <div class="d-flex align-items-center">
-                     <input type="text" id="apiEndpoint" class="form-control" placeholder="Enter Ollama API endpoint...">
+                     <input type="text" id="apiEndpoint" class="form-control"
+                        placeholder="Enter Ollama API endpoint...">
                      <div id="statusIndicator" class="status-indicator status-offline" title="Ollama Status"></div>
                   </div>
                </div>
@@ -134,21 +152,26 @@
                   <select id="model" class="form-select"></select>
                </div>
 
-               <div class="mb-3">
-                  <label for="prompt" class="form-label">Your Question:</label>
-                  <textarea id="prompt" class="form-control" rows="4" placeholder="Enter your prompt..."></textarea>
-               </div>
+               <form id="chatForm">
+                  <div class="mb-3">
+                     <label for="prompt" class="form-label">Your Question:</label>
+                     <textarea id="prompt" class="form-control" rows="4" placeholder="Enter your prompt..."></textarea>
+                  </div>
 
-               <div class="mb-3">
-                  <label for="image" class="form-label">Upload Image (Optional):</label>
-                  <input type="file" id="image" class="form-control" accept="image/*">
-                  <img id="uploadedImage" class="img-fluid mt-2" alt="Uploaded Image Preview">
-               </div>
+                  <div class="mb-3">
+                     <label for="image" class="form-label">Upload Image (Optional):</label>
+                     <input type="file" id="image" class="form-control" accept="image/*">
+                     <img id="uploadedImage" class="img-fluid mt-2" alt="Uploaded Image Preview">
+                  </div>
 
-               <button class="btn btn-primary w-100" onclick="askOllama()">🚀 Ask AI</button>
+                  <button type="submit" class="btn btn-primary w-100">🚀 Ask AI</button>
+               </form>
 
                <h5 class="mt-4">Response:</h5>
-               <div id="response">Waiting for input...</div>
+               <div id="response">
+                  <button onclick="copyResponse()" class="copy-btn">📋 Copy</button>
+                  <div class="mt-4" id="responseContent">Waiting for input...</div>
+               </div>
             </div>
          </div>
 
@@ -321,7 +344,7 @@
       async function checkOllamaStatus() {
          const apiEndpoint = document.getElementById('apiEndpoint').value;
          const statusIndicator = document.getElementById('statusIndicator');
-         
+
          try {
             const response = await fetch(`${apiEndpoint}/api/tags`);
             if (response.ok) {
@@ -368,7 +391,7 @@
       async function askOllama() {
          const prompt = document.getElementById('prompt').value;
          const model = document.getElementById('model').value;
-         const responseDiv = document.getElementById('response');
+         const responseDiv = document.getElementById('responseContent');
          const imageInput = document.getElementById('image').files[0];
          const imagePreview = document.getElementById('uploadedImage');
          const apiEndpoint = document.getElementById('apiEndpoint').value;
@@ -440,6 +463,17 @@
          });
       }
 
+      function copyResponse() {
+         const responseContent = document.getElementById('responseContent').innerText;
+         navigator.clipboard.writeText(responseContent).then(() => {
+            const copyBtn = document.querySelector('.copy-btn');
+            copyBtn.textContent = '✓ Copied!';
+            setTimeout(() => {
+               copyBtn.textContent = '📋 Copy';
+            }, 2000);
+         });
+      }
+
       // Load endpoint from localStorage or set default
       function loadEndpoint() {
          const savedEndpoint = localStorage.getItem('ollamaEndpoint');
@@ -453,6 +487,19 @@
          localStorage.setItem('ollamaEndpoint', e.target.value);
          checkOllamaStatus();
          fetchModels();
+      });
+
+      // Handle form submission and enter key
+      document.getElementById('chatForm').addEventListener('submit', (e) => {
+         e.preventDefault();
+         askOllama();
+      });
+
+      document.getElementById('prompt').addEventListener('keydown', (e) => {
+         if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            askOllama();
+         }
       });
 
       window.onload = () => {
