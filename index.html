@@ -485,6 +485,7 @@
                   const json = JSON.parse(line);
                   if (json.response) {
                      accumulatedResponse += json.response;
+                     previousResponse += marked.parse(accumulatedResponse);
                      responseDiv.innerHTML = marked.parse(accumulatedResponse);
                   }
                }
