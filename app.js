@@ -81,7 +81,9 @@ app.post('/api/generate', async (req, res) => {
         
         res.status(statusCode).json({
             error: "Failed to generate from Ollama API",
-            details: errorMessage
+            details: errorMessage,
+            fullError: error,
+            baseUrl: OLLAMA_URL,
         });
     }
 });
@@ -106,7 +108,9 @@ app.get('/api/tags', async (req, res) => {
         
         res.status(statusCode).json({
             error: "Failed to fetch tags from Ollama API",
-            details: errorMessage
+            details: errorMessage,
+            fullError: error,
+            baseUrl: OLLAMA_URL,
         });
     }
 });
