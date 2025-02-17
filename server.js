@@ -156,6 +156,8 @@ app.use("*", async (req, res) => {
         res.status(statusCode).json({
             error: "Failed to fetch from Ollama API",
             details: errorMessage,
+            fullError: error,
+            baseUrl: OLLAMA_URL,
             path: req.originalUrl
         });
     }
