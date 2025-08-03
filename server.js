@@ -44,7 +44,10 @@ app.use((req, res, next) => {
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK' });
 });
-
+// request ip check endpoint
+app.get('/ip', (req, res) => {
+    res.status(200).json({ ip: req.ip });
+});
 // Handle /api/generate specifically
 app.post('/api/generate', async (req, res) => {
     try {
